@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,44 +11,76 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
+            font-size: 18px;
         }
+
         .container {
             text-align: center;
             background-color: white;
             padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
         }
+
         #progress-bar {
             width: 100%;
-            height: 20px;
+            height: 30px;
             background-color: #e0e0e0;
-            border-radius: 10px;
+            border-radius: 15px;
             margin-top: 1rem;
         }
+
         #progress {
             width: 0%;
             height: 100%;
             background-color: #4CAF50;
-            border-radius: 10px;
+            border-radius: 15px;
             transition: width 0.5s;
         }
+
         button {
-            font-size: 1.2rem;
-            padding: 0.5rem 1rem;
+            font-size: 1.5rem;
+            padding: 0.75rem 1.5rem;
             margin: 1rem 0.5rem;
             cursor: pointer;
         }
+
         input {
-            font-size: 1rem;
-            padding: 0.5rem;
-            width: 100px;
+            font-size: 1.2rem;
+            padding: 0.75rem;
+            width: 150px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        #pause-history {
+            margin-top: 2rem;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 1rem;
+            border-radius: 5px;
+        }
+
+        #pause-history h3 {
+            margin-top: 0;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Study Timer</h1>
@@ -61,6 +94,9 @@
             <div id="progress"></div>
         </div>
         <button id="pause-play-btn">Pause</button>
+        <div id="pause-history">
+            <h3>Pause History</h3>
+        </div>
     </div>
     <script>
         const dateEl = document.getElementById('date');
@@ -71,11 +107,13 @@
         const timeLeftEl = document.getElementById('time-left');
         const progressBar = document.getElementById('progress');
         const pausePlayBtn = document.getElementById('pause-play-btn');
+            const pauseHistoryEl = document.getElementById('pause-history');
 
         let timer;
         let totalSeconds = 0;
         let elapsedSeconds = 0;
         let isRunning = false;
+            let pauseHistory = [];
 
         function updateDateTime() {
             const now = new Date();
@@ -118,7 +156,8 @@
             totalSeconds = plannedMinutes * 60;
             elapsedSeconds = 0;
             isRunning = true;
-            
+            pauseHistory = [];
+
             totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
             pausePlayBtn.textContent = 'Pause';
             pausePlayBtn.disabled = false;
@@ -126,12 +165,14 @@
             timer = setInterval(updateTimer, 1000);
             startBtn.disabled = true;
             plannedTimeInput.disabled = true;
+            updatePauseHistory();
         }
 
         function togglePausePlay() {
             if (isRunning) {
                 clearInterval(timer);
                 pausePlayBtn.textContent = 'Play';
+                addPauseEntry();
             } else {
                 timer = setInterval(updateTimer, 1000);
                 pausePlayBtn.textContent = 'Pause';
@@ -139,11 +180,30 @@
             isRunning = !isRunning;
         }
 
+            function addPauseEntry() {
+                const now = new Date();
+                pauseHistory.push({
+                    timeWorked: formatTime(elapsedSeconds),
+                    pauseTime: now.toLocaleTimeString()
+                });
+                updatePauseHistory();
+            }
+
+            function updatePauseHistory() {
+                pauseHistoryEl.innerHTML = '<h3>Pause History</h3>';
+                pauseHistory.forEach((entry, index) => {
+                    const entryEl = document.createElement('p');
+                    entryEl.textContent = `Pause ${index + 1}: Worked ${entry.timeWorked} before pausing at ${entry.pauseTime}`;
+                    pauseHistoryEl.appendChild(entryEl);
+                });
+            }
+
         function saveData() {
             const data = {
                 date: new Date().toDateString(),
                 totalSeconds,
-                elapsedSeconds
+                elapsedSeconds,
+                pauseHistory
             };
             localStorage.setItem('studyTimerData', JSON.stringify(data));
         }
@@ -155,9 +215,11 @@
                 if (data.date === new Date().toDateString()) {
                     totalSeconds = data.totalSeconds;
                     elapsedSeconds = data.elapsedSeconds;
+                    pauseHistory = data.pauseHistory || [];
                     plannedTimeInput.value = Math.floor(totalSeconds / 60);
                     totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
                     updateTimer();
+                    updatePauseHistory();
                     startBtn.disabled = true;
                     plannedTimeInput.disabled = true;
                     pausePlayBtn.disabled = false;
@@ -173,4 +235,5 @@
         loadData();
     </script>
 </body>
+
 </html>
