@@ -65,9 +65,10 @@
             margin: 0.5rem 0;
         }
 
-        #target-time {
+        #total-time {
             font-size: 2.5rem;
             color: #FF6B6B;
+            /* Reusing the CSS color from #target-time */
             font-weight: bold;
         }
 
@@ -107,7 +108,6 @@
         <p id="current-time"></p>
         <input type="number" id="planned-time" placeholder="Minutes">
         <button id="start-btn">Start</button>
-        <p id="target-time"></p>
         <p id="total-time"></p>
         <p id="time-left"></p>
         <div id="progress-bar">
@@ -123,8 +123,7 @@
         const dateEl = document.getElementById('date');
         const currentTimeEl = document.getElementById('current-time');
         const plannedTimeInput = document.getElementById('planned-time');
-        const startBtn = document.getElementById('start-btn');
-            const targetTimeEl = document.getElementById('target-time');
+                                                                                const startBtn = document.getElementById('start-btn');
         const totalTimeEl = document.getElementById('total-time');
         const timeLeftEl = document.getElementById('time-left');
         const progressBar = document.getElementById('progress');
@@ -137,8 +136,7 @@
         let elapsedSeconds = 0;
         let isRunning = false;
             let pauseHistory = [];
-            let startTime;
-            let targetTime;
+                                                                                let startTime;
 
         function updateDateTime() {
             const now = new Date();
@@ -185,10 +183,8 @@
             isRunning = true;
             pauseHistory = [];
             startTime = new Date();
-            targetTime = new Date(startTime.getTime() + totalSeconds * 1000);
 
             totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
-            targetTimeEl.textContent = `Target finish time: ${targetTime.toLocaleTimeString()}`;
             pausePlayBtn.textContent = 'Pause';
             pausePlayBtn.disabled = false;
             finishedMessageEl.style.display = 'none';
@@ -237,8 +233,7 @@
                 totalSeconds,
                 elapsedSeconds,
                 pauseHistory,
-                startTime: startTime.toISOString(),
-                targetTime: targetTime.toISOString()
+                startTime: startTime.toISOString()
             };
             localStorage.setItem('studyTimerData', JSON.stringify(data));
         }
@@ -252,10 +247,8 @@
                     elapsedSeconds = data.elapsedSeconds;
                     pauseHistory = data.pauseHistory || [];
                     startTime = new Date(data.startTime);
-                    targetTime = new Date(data.targetTime);
                     plannedTimeInput.value = Math.floor(totalSeconds / 60);
                     totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
-                    targetTimeEl.textContent = `Target finish time: ${targetTime.toLocaleTimeString()}`;
                     updateTimer();
                     updatePauseHistory();
                     startBtn.disabled = true;
@@ -268,12 +261,21 @@
         startBtn.addEventListener('click', startTimer);
         pausePlayBtn.addEventListener('click', togglePausePlay);
 
+                                                                                // Event listener for space bar to toggle play/pause
             document.addEventListener('keydown', (event) => {
                 if (event.code === 'Space') {
-                    event.preventDefault();
-                    if (!startBtn.disabled) {
-                        togglePausePlay();
-                    }
+                    event.preventDefault(); // Prevents default space bar action
+
+                    togglePausePlay(); // Calls the function to toggle play/pause
+
+                }
+            });
+
+                // Event listener for Enter key to submit input
+                plannedTimeInput.addEventListener('keydown', (event) => {
+                    if (event.code === 'Enter') {
+                        event.preventDefault(); // Prevents default Enter action (e.g., form submission)
+                        startTimer(); // Calls the function to start the timer
                 }
             });
 
