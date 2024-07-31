@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+        #progress {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        button {
+            font-size: 1.2rem;
+            padding: 0.5rem 1rem;
+            margin: 1rem 0.5rem;
+            cursor: pointer;
+        }
+        input {
+            font-size: 1rem;
+            padding: 0.5rem;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Study Timer</h1>
+        <p id="date"></p>
+        <p id="current-time"></p>
+        <input type="number" id="planned-time" placeholder="Minutes">
+        <button id="start-btn">Start</button>
+        <p id="total-time"></p>
+        <p id="time-left"></p>
+        <div id="progress-bar">
+            <div id="progress"></div>
+        </div>
+        <button id="pause-play-btn">Pause</button>
+    </div>
+    <script>
+        const dateEl = document.getElementById('date');
+        const currentTimeEl = document.getElementById('current-time');
+        const plannedTimeInput = document.getElementById('planned-time');
+        const startBtn = document.getElementById('start-btn');
+        const totalTimeEl = document.getElementById('total-time');
+        const timeLeftEl = document.getElementById('time-left');
+        const progressBar = document.getElementById('progress');
+        const pausePlayBtn = document.getElementById('pause-play-btn');
+
+        let timer;
+        let totalSeconds = 0;
+        let elapsedSeconds = 0;
+        let isRunning = false;
+
+        function updateDateTime() {
+            const now = new Date();
+            dateEl.textContent = now.toDateString();
+            currentTimeEl.textContent = now.toLocaleTimeString();
+        }
+
+        function updateTimer() {
+            const remainingSeconds = totalSeconds - elapsedSeconds;
+            const percent = (elapsedSeconds / totalSeconds) * 100;
+
+            timeLeftEl.textContent = `Time left: ${formatTime(remainingSeconds)}`;
+            progressBar.style.width = `${percent}%`;
+
+            if (remainingSeconds <= 0) {
+                clearInterval(timer);
+                isRunning = false;
+                pausePlayBtn.textContent = 'Finished';
+                pausePlayBtn.disabled = true;
+                saveData();
+            } else {
+                elapsedSeconds++;
+                saveData();
+            }
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            const plannedMinutes = parseInt(plannedTimeInput.value);
+            if (isNaN(plannedMinutes) || plannedMinutes <= 0) {
+                alert('Please enter a valid number of minutes.');
+                return;
+            }
+
+            totalSeconds = plannedMinutes * 60;
+            elapsedSeconds = 0;
+            isRunning = true;
+            
+            totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
+            pausePlayBtn.textContent = 'Pause';
+            pausePlayBtn.disabled = false;
+
+            timer = setInterval(updateTimer, 1000);
+            startBtn.disabled = true;
+            plannedTimeInput.disabled = true;
+        }
+
+        function togglePausePlay() {
+            if (isRunning) {
+                clearInterval(timer);
+                pausePlayBtn.textContent = 'Play';
+            } else {
+                timer = setInterval(updateTimer, 1000);
+                pausePlayBtn.textContent = 'Pause';
+            }
+            isRunning = !isRunning;
+        }
+
+        function saveData() {
+            const data = {
+                date: new Date().toDateString(),
+                totalSeconds,
+                elapsedSeconds
+            };
+            localStorage.setItem('studyTimerData', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('studyTimerData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                if (data.date === new Date().toDateString()) {
+                    totalSeconds = data.totalSeconds;
+                    elapsedSeconds = data.elapsedSeconds;
+                    plannedTimeInput.value = Math.floor(totalSeconds / 60);
+                    totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
+                    updateTimer();
+                    startBtn.disabled = true;
+                    plannedTimeInput.disabled = true;
+                    pausePlayBtn.disabled = false;
+                }
+            }
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        pausePlayBtn.addEventListener('click', togglePausePlay);
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+        loadData();
+    </script>
+</body>
+</html>
