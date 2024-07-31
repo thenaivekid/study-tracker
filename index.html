@@ -23,7 +23,7 @@
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            max-width: 800px;
             width: 90%;
         }
 
@@ -44,25 +44,44 @@
         }
 
         button {
-            font-size: 1.5rem;
-            padding: 0.75rem 1.5rem;
+            font-size: 2rem;
+            padding: 1rem 2rem;
             margin: 1rem 0.5rem;
             cursor: pointer;
         }
 
         input {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             padding: 0.75rem;
             width: 150px;
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 3rem;
         }
 
         p {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             margin: 0.5rem 0;
+        }
+
+        #target-time {
+            font-size: 2.5rem;
+            color: #FF6B6B;
+            font-weight: bold;
+        }
+
+        #time-left {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        #finished-message {
+            font-size: 3rem;
+            color: #4CAF50;
+            font-weight: bold;
+            display: none;
         }
 
         #pause-history {
@@ -88,12 +107,14 @@
         <p id="current-time"></p>
         <input type="number" id="planned-time" placeholder="Minutes">
         <button id="start-btn">Start</button>
+        <p id="target-time"></p>
         <p id="total-time"></p>
         <p id="time-left"></p>
         <div id="progress-bar">
             <div id="progress"></div>
         </div>
         <button id="pause-play-btn">Pause</button>
+        <p id="finished-message">Congratulations! You've finished your study session!</p>
         <div id="pause-history">
             <h3>Pause History</h3>
         </div>
@@ -103,17 +124,21 @@
         const currentTimeEl = document.getElementById('current-time');
         const plannedTimeInput = document.getElementById('planned-time');
         const startBtn = document.getElementById('start-btn');
+            const targetTimeEl = document.getElementById('target-time');
         const totalTimeEl = document.getElementById('total-time');
         const timeLeftEl = document.getElementById('time-left');
         const progressBar = document.getElementById('progress');
         const pausePlayBtn = document.getElementById('pause-play-btn');
             const pauseHistoryEl = document.getElementById('pause-history');
+            const finishedMessageEl = document.getElementById('finished-message');
 
         let timer;
         let totalSeconds = 0;
         let elapsedSeconds = 0;
         let isRunning = false;
             let pauseHistory = [];
+            let startTime;
+            let targetTime;
 
         function updateDateTime() {
             const now = new Date();
@@ -133,6 +158,8 @@
                 isRunning = false;
                 pausePlayBtn.textContent = 'Finished';
                 pausePlayBtn.disabled = true;
+                finishedMessageEl.style.display = 'block';
+                timeLeftEl.style.display = 'none';
                 saveData();
             } else {
                 elapsedSeconds++;
@@ -157,10 +184,15 @@
             elapsedSeconds = 0;
             isRunning = true;
             pauseHistory = [];
+            startTime = new Date();
+            targetTime = new Date(startTime.getTime() + totalSeconds * 1000);
 
             totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
+            targetTimeEl.textContent = `Target finish time: ${targetTime.toLocaleTimeString()}`;
             pausePlayBtn.textContent = 'Pause';
             pausePlayBtn.disabled = false;
+            finishedMessageEl.style.display = 'none';
+            timeLeftEl.style.display = 'block';
 
             timer = setInterval(updateTimer, 1000);
             startBtn.disabled = true;
@@ -184,26 +216,29 @@
                 const now = new Date();
                 pauseHistory.push({
                     timeWorked: formatTime(elapsedSeconds),
-                    pauseTime: now.toLocaleTimeString()
-                });
-                updatePauseHistory();
-            }
+                pauseTime: now.toLocaleTimeString(),
+                startedTime: startTime.toLocaleTimeString()
+            });
+            updatePauseHistory();
+        }
 
             function updatePauseHistory() {
                 pauseHistoryEl.innerHTML = '<h3>Pause History</h3>';
                 pauseHistory.forEach((entry, index) => {
                     const entryEl = document.createElement('p');
-                    entryEl.textContent = `Pause ${index + 1}: Worked ${entry.timeWorked} before pausing at ${entry.pauseTime}`;
-                    pauseHistoryEl.appendChild(entryEl);
-                });
-            }
+                entryEl.textContent = `Pause ${index + 1}: Started at ${entry.startedTime}, worked ${entry.timeWorked} before pausing at ${entry.pauseTime}`;
+                pauseHistoryEl.appendChild(entryEl);
+            });
+        }
 
         function saveData() {
             const data = {
                 date: new Date().toDateString(),
                 totalSeconds,
                 elapsedSeconds,
-                pauseHistory
+                pauseHistory,
+                startTime: startTime.toISOString(),
+                targetTime: targetTime.toISOString()
             };
             localStorage.setItem('studyTimerData', JSON.stringify(data));
         }
@@ -216,8 +251,11 @@
                     totalSeconds = data.totalSeconds;
                     elapsedSeconds = data.elapsedSeconds;
                     pauseHistory = data.pauseHistory || [];
+                    startTime = new Date(data.startTime);
+                    targetTime = new Date(data.targetTime);
                     plannedTimeInput.value = Math.floor(totalSeconds / 60);
                     totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
+                    targetTimeEl.textContent = `Target finish time: ${targetTime.toLocaleTimeString()}`;
                     updateTimer();
                     updatePauseHistory();
                     startBtn.disabled = true;
@@ -229,6 +267,15 @@
 
         startBtn.addEventListener('click', startTimer);
         pausePlayBtn.addEventListener('click', togglePausePlay);
+
+            document.addEventListener('keydown', (event) => {
+                if (event.code === 'Space') {
+                    event.preventDefault();
+                    if (!startBtn.disabled) {
+                        togglePausePlay();
+                    }
+                }
+            });
 
         setInterval(updateDateTime, 1000);
         updateDateTime();
