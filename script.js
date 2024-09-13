@@ -86,14 +86,16 @@ function togglePausePlay() {
     } else {
         timer = setInterval(updateTimer, 1000);
         pausePlayBtn.textContent = 'Pause';
+        startTime = new Date();
     }
     isRunning = !isRunning;
 }
 
 function addPauseEntry() {
     const now = new Date();
+    const timeWorkedInMinutes = ((now - startTime) / 1000 / 60).toFixed(1);
     pauseHistory.push({
-        timeWorked: formatTime(elapsedSeconds),
+        timeWorked: timeWorkedInMinutes,
         pauseTime: now.toLocaleTimeString(),
         startedTime: startTime.toLocaleTimeString()
     });
@@ -101,13 +103,64 @@ function addPauseEntry() {
 }
 
 function updatePauseHistory() {
+    // Clear previous history and create a new table
     pauseHistoryEl.innerHTML = '<h3>Pause History</h3>';
-    pauseHistory.forEach((entry, index) => {
-        const entryEl = document.createElement('p');
-        entryEl.textContent = `Pause ${index + 1}: Started at ${entry.startedTime}, worked ${entry.timeWorked} before pausing at ${entry.pauseTime}`;
-        pauseHistoryEl.appendChild(entryEl);
+
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+
+    // Create table headers
+    const headerRow = document.createElement('tr');
+    const headers = ['Pause #', 'Started At', 'Time Worked (min)', 'Paused At'];
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        th.style.border = '1px solid black';
+        th.style.padding = '8px';
+        headerRow.appendChild(th);
     });
+    table.appendChild(headerRow);
+
+    // Add data rows
+    pauseHistory.forEach((entry, index) => {
+        const row = document.createElement('tr');
+
+        // Create cells for pause number, start time, time worked, and pause time
+        const pauseNumberCell = document.createElement('td');
+        pauseNumberCell.textContent = index + 1;
+        pauseNumberCell.style.border = '1px solid black';
+        pauseNumberCell.style.padding = '8px';
+
+        const startedTimeCell = document.createElement('td');
+        startedTimeCell.textContent = entry.startedTime;
+        startedTimeCell.style.border = '1px solid black';
+        startedTimeCell.style.padding = '8px';
+
+        const timeWorkedCell = document.createElement('td');
+        timeWorkedCell.textContent = entry.timeWorked;
+        timeWorkedCell.style.border = '1px solid black';
+        timeWorkedCell.style.padding = '8px';
+
+        const pausedAtCell = document.createElement('td');
+        pausedAtCell.textContent = entry.pauseTime;
+        pausedAtCell.style.border = '1px solid black';
+        pausedAtCell.style.padding = '8px';
+
+        // Append cells to the row
+        row.appendChild(pauseNumberCell);
+        row.appendChild(startedTimeCell);
+        row.appendChild(timeWorkedCell);
+        row.appendChild(pausedAtCell);
+
+        // Append row to the table
+        table.appendChild(row);
+    });
+
+    // Append the table to the pause history container
+    pauseHistoryEl.appendChild(table);
 }
+
 
 function saveData() {
     const data = {
