@@ -102,6 +102,7 @@ function addPauseEntry() {
     updatePauseHistory();
 }
 
+
 function updatePauseHistory() {
     // Clear previous history and create a new table
     pauseHistoryEl.innerHTML = '<h3>Pause History</h3>';
@@ -163,6 +164,7 @@ function updatePauseHistory() {
 
 
 function saveData() {
+    const currentDate = new Date().toDateString();
     const data = {
         date: new Date().toDateString(),
         totalSeconds,
@@ -170,19 +172,22 @@ function saveData() {
         pauseHistory,
         startTime: startTime.toISOString()
     };
-    localStorage.setItem('studyTimerData', JSON.stringify(data));
+    const allData = JSON.parse(localStorage.getItem('studyTimerData')) || {};
+    allData[new Date().toDateString()] = data;
+    localStorage.setItem('studyTimerData', JSON.stringify(allData));
 }
 
 function loadData() {
     const savedData = localStorage.getItem('studyTimerData');
     if (savedData) {
-        const data = JSON.parse(savedData);
-        if (data.date === new Date().toDateString()) {
-            totalSeconds = data.totalSeconds;
-            elapsedSeconds = data.elapsedSeconds;
-            pauseHistory = data.pauseHistory || [];
-            startTime = new Date(data.startTime);
-            plannedTimeInput.value = Math.floor(totalSeconds / 60);
+        const allData = JSON.parse(savedData);
+        const todayData = allData[new Date().toDateString()];
+        if (todayData) {
+            totalSeconds = todayData.totalSeconds;
+            elapsedSeconds = todayData.elapsedSeconds;
+            pauseHistory = todayData.pauseHistory || [];
+            startTime = new Date(todayData.startTime);
+            plannedTimeInput.value = (totalSeconds / 3600).toFixed(1); // Convert to hours
             totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
             updateTimer();
             updatePauseHistory();
@@ -192,6 +197,7 @@ function loadData() {
         }
     }
 }
+
 
 startBtn.addEventListener('click', startTimer);
 pausePlayBtn.addEventListener('click', togglePausePlay);
