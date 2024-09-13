@@ -1,0 +1,91 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    font-size: 18px;
+}
+
+.container {
+    text-align: center;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 90%;
+}
+
+#progress-bar {
+    width: 100%;
+    height: 30px;
+    background-color: #e0e0e0;
+    border-radius: 15px;
+    margin-top: 1rem;
+}
+
+#progress {
+    width: 0%;
+    height: 100%;
+    background-color: #4CAF50;
+    border-radius: 15px;
+    transition: width 0.5s;
+}
+
+button {
+    font-size: 2rem;
+    padding: 1rem 2rem;
+    margin: 1rem 0.5rem;
+    cursor: pointer;
+}
+
+input {
+    font-size: 1.5rem;
+    padding: 0.75rem;
+    width: 150px;
+}
+
+h1 {
+    font-size: 3rem;
+}
+
+p {
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+#total-time {
+    font-size: 2.5rem;
+    color: #FF6B6B;
+    font-weight: bold;
+}
+
+#time-left {
+    font-size: 2.5rem;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+#finished-message {
+    font-size: 3rem;
+    color: #4CAF50;
+    font-weight: bold;
+    display: none;
+}
+
+#pause-history {
+    margin-top: 2rem;
+    text-align: left;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 5px;
+}
+
+#pause-history h3 {
+    margin-top: 0;
+}

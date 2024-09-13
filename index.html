@@ -5,100 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Timer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            font-size: 18px;
-        }
-
-        .container {
-            text-align: center;
-            background-color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            width: 90%;
-        }
-
-        #progress-bar {
-            width: 100%;
-            height: 30px;
-            background-color: #e0e0e0;
-            border-radius: 15px;
-            margin-top: 1rem;
-        }
-
-        #progress {
-            width: 0%;
-            height: 100%;
-            background-color: #4CAF50;
-            border-radius: 15px;
-            transition: width 0.5s;
-        }
-
-        button {
-            font-size: 2rem;
-            padding: 1rem 2rem;
-            margin: 1rem 0.5rem;
-            cursor: pointer;
-        }
-
-        input {
-            font-size: 1.5rem;
-            padding: 0.75rem;
-            width: 150px;
-        }
-
-        h1 {
-            font-size: 3rem;
-        }
-
-        p {
-            font-size: 1.5rem;
-            margin: 0.5rem 0;
-        }
-
-        #total-time {
-            font-size: 2.5rem;
-            color: #FF6B6B;
-            /* Reusing the CSS color from #target-time */
-            font-weight: bold;
-        }
-
-        #time-left {
-            font-size: 2.5rem;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-
-        #finished-message {
-            font-size: 3rem;
-            color: #4CAF50;
-            font-weight: bold;
-            display: none;
-        }
-
-        #pause-history {
-            margin-top: 2rem;
-            text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 1rem;
-            border-radius: 5px;
-        }
-
-        #pause-history h3 {
-            margin-top: 0;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -106,7 +13,7 @@
         <h1>Study Timer</h1>
         <p id="date"></p>
         <p id="current-time"></p>
-        <input type="number" id="planned-time" placeholder="Minutes">
+        <input type="number" id="planned-time" placeholder="EG 1.5 (hr)">
         <button id="start-btn">Start</button>
         <p id="total-time"></p>
         <p id="time-left"></p>
@@ -114,175 +21,12 @@
             <div id="progress"></div>
         </div>
         <button id="pause-play-btn">Pause</button>
-        <p id="finished-message">Congratulations! You've finished your study session!</p>
+        <p id="finished-message">Congratulations! You've finished today's work!</p>
         <div id="pause-history">
             <h3>Pause History</h3>
         </div>
     </div>
-    <script>
-        const dateEl = document.getElementById('date');
-        const currentTimeEl = document.getElementById('current-time');
-        const plannedTimeInput = document.getElementById('planned-time');
-                                                                                const startBtn = document.getElementById('start-btn');
-        const totalTimeEl = document.getElementById('total-time');
-        const timeLeftEl = document.getElementById('time-left');
-        const progressBar = document.getElementById('progress');
-        const pausePlayBtn = document.getElementById('pause-play-btn');
-            const pauseHistoryEl = document.getElementById('pause-history');
-            const finishedMessageEl = document.getElementById('finished-message');
-
-        let timer;
-        let totalSeconds = 0;
-        let elapsedSeconds = 0;
-        let isRunning = false;
-            let pauseHistory = [];
-                                                                                let startTime;
-
-        function updateDateTime() {
-            const now = new Date();
-            dateEl.textContent = now.toDateString();
-            currentTimeEl.textContent = now.toLocaleTimeString();
-        }
-
-        function updateTimer() {
-            const remainingSeconds = totalSeconds - elapsedSeconds;
-            const percent = (elapsedSeconds / totalSeconds) * 100;
-
-            timeLeftEl.textContent = `Time left: ${formatTime(remainingSeconds)}`;
-            progressBar.style.width = `${percent}%`;
-
-            if (remainingSeconds <= 0) {
-                clearInterval(timer);
-                isRunning = false;
-                pausePlayBtn.textContent = 'Finished';
-                pausePlayBtn.disabled = true;
-                finishedMessageEl.style.display = 'block';
-                timeLeftEl.style.display = 'none';
-                saveData();
-            } else {
-                elapsedSeconds++;
-                saveData();
-            }
-        }
-
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        function startTimer() {
-            const plannedMinutes = parseInt(plannedTimeInput.value);
-            if (isNaN(plannedMinutes) || plannedMinutes <= 0) {
-                alert('Please enter a valid number of minutes.');
-                return;
-            }
-
-            totalSeconds = plannedMinutes * 60;
-            elapsedSeconds = 0;
-            isRunning = true;
-            pauseHistory = [];
-            startTime = new Date();
-
-            totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
-            pausePlayBtn.textContent = 'Pause';
-            pausePlayBtn.disabled = false;
-            finishedMessageEl.style.display = 'none';
-            timeLeftEl.style.display = 'block';
-
-            timer = setInterval(updateTimer, 1000);
-            startBtn.disabled = true;
-            plannedTimeInput.disabled = true;
-            updatePauseHistory();
-        }
-
-        function togglePausePlay() {
-            if (isRunning) {
-                clearInterval(timer);
-                pausePlayBtn.textContent = 'Play';
-                addPauseEntry();
-            } else {
-                timer = setInterval(updateTimer, 1000);
-                pausePlayBtn.textContent = 'Pause';
-            }
-            isRunning = !isRunning;
-        }
-
-            function addPauseEntry() {
-                const now = new Date();
-                pauseHistory.push({
-                    timeWorked: formatTime(elapsedSeconds),
-                pauseTime: now.toLocaleTimeString(),
-                startedTime: startTime.toLocaleTimeString()
-            });
-            updatePauseHistory();
-        }
-
-            function updatePauseHistory() {
-                pauseHistoryEl.innerHTML = '<h3>Pause History</h3>';
-                pauseHistory.forEach((entry, index) => {
-                    const entryEl = document.createElement('p');
-                entryEl.textContent = `Pause ${index + 1}: Started at ${entry.startedTime}, worked ${entry.timeWorked} before pausing at ${entry.pauseTime}`;
-                pauseHistoryEl.appendChild(entryEl);
-            });
-        }
-
-        function saveData() {
-            const data = {
-                date: new Date().toDateString(),
-                totalSeconds,
-                elapsedSeconds,
-                pauseHistory,
-                startTime: startTime.toISOString()
-            };
-            localStorage.setItem('studyTimerData', JSON.stringify(data));
-        }
-
-        function loadData() {
-            const savedData = localStorage.getItem('studyTimerData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                if (data.date === new Date().toDateString()) {
-                    totalSeconds = data.totalSeconds;
-                    elapsedSeconds = data.elapsedSeconds;
-                    pauseHistory = data.pauseHistory || [];
-                    startTime = new Date(data.startTime);
-                    plannedTimeInput.value = Math.floor(totalSeconds / 60);
-                    totalTimeEl.textContent = `Total time: ${formatTime(totalSeconds)}`;
-                    updateTimer();
-                    updatePauseHistory();
-                    startBtn.disabled = true;
-                    plannedTimeInput.disabled = true;
-                    pausePlayBtn.disabled = false;
-                }
-            }
-        }
-
-        startBtn.addEventListener('click', startTimer);
-        pausePlayBtn.addEventListener('click', togglePausePlay);
-
-                                                                                // Event listener for space bar to toggle play/pause
-            document.addEventListener('keydown', (event) => {
-                if (event.code === 'Space') {
-                    event.preventDefault(); // Prevents default space bar action
-
-                    togglePausePlay(); // Calls the function to toggle play/pause
-
-                }
-            });
-
-                // Event listener for Enter key to submit input
-                plannedTimeInput.addEventListener('keydown', (event) => {
-                    if (event.code === 'Enter') {
-                        event.preventDefault(); // Prevents default Enter action (e.g., form submission)
-                        startTimer(); // Calls the function to start the timer
-                }
-            });
-
-        setInterval(updateDateTime, 1000);
-        updateDateTime();
-        loadData();
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>
