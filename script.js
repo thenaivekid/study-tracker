@@ -8,6 +8,7 @@ const progressBar = document.getElementById('progress');
 const pausePlayBtn = document.getElementById('pause-play-btn');
 const pauseHistoryEl = document.getElementById('pause-history');
 const finishedMessageEl = document.getElementById('finished-message');
+const exportBtn = document.getElementById('export-btn');
 
 let timer;
 let totalSeconds = 0;
@@ -76,8 +77,6 @@ function startTimer() {
     updatePauseHistory();
 }
 
-
-
 function togglePausePlay() {
     if (isRunning) {
         clearInterval(timer);
@@ -101,7 +100,6 @@ function addPauseEntry() {
     });
     updatePauseHistory();
 }
-
 
 function updatePauseHistory() {
     // Clear previous history and create a new table
@@ -162,7 +160,6 @@ function updatePauseHistory() {
     pauseHistoryEl.appendChild(table);
 }
 
-
 function saveData() {
     const currentDate = new Date().toDateString();
     const data = {
@@ -198,6 +195,26 @@ function loadData() {
     }
 }
 
+function exportToCSV() {
+    const allData = JSON.parse(localStorage.getItem('studyTimerData')) || {};
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Date,Started At,Work Duration (min),Paused At\n";
+
+    for (const date in allData) {
+        const dayData = allData[date];
+        dayData.pauseHistory.forEach(pause => {
+            csvContent += `${date},${pause.startedTime},${pause.timeWorked},${pause.pauseTime}\n`;
+        });
+    }
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "study_timer_data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
 startBtn.addEventListener('click', startTimer);
 pausePlayBtn.addEventListener('click', togglePausePlay);
@@ -219,3 +236,5 @@ plannedTimeInput.addEventListener('keydown', (event) => {
 setInterval(updateDateTime, 1000);
 updateDateTime();
 loadData();
+
+exportBtn.addEventListener('click', exportToCSV);
