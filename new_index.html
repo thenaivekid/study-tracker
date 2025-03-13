@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Time Tracker</title>
+    <title>Enhanced Study Time Tracker</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -20,11 +20,17 @@
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
         }
 
         h1 {
             text-align: center;
-            color: #2c3e50;
         }
 
         .timer-display {
@@ -39,6 +45,8 @@
             display: flex;
             justify-content: center;
             margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .btn {
@@ -46,7 +54,7 @@
             color: white;
             border: none;
             padding: 10px 20px;
-            margin: 0 10px;
+            margin: 0 5px;
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
@@ -60,14 +68,43 @@
         .btn-play-pause {
             min-width: 120px;
             font-weight: bold;
-        }
-
-        .btn-download {
             background-color: #27ae60;
         }
 
-        .btn-download:hover {
+        .btn-play-pause:hover {
             background-color: #219653;
+        }
+
+        .btn-play-pause.paused {
+            background-color: #e74c3c;
+        }
+
+        .btn-play-pause.paused:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-download {
+            background-color: #9b59b6;
+        }
+
+        .btn-download:hover {
+            background-color: #8e44ad;
+        }
+
+        .btn-dashboard {
+            background-color: #f39c12;
+        }
+
+        .btn-dashboard:hover {
+            background-color: #d35400;
+        }
+
+        .btn-reset {
+            background-color: #e74c3c;
+        }
+
+        .btn-reset:hover {
+            background-color: #c0392b;
         }
 
         .stats {
@@ -102,18 +139,317 @@
             font-weight: bold;
             color: #3498db;
         }
+
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .dashboard-nav button {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            margin: 0 5px;
+            font-size: 16px;
+            cursor: pointer;
+            color: #7f8c8d;
+            border-bottom: 2px solid transparent;
+        }
+
+        .dashboard-nav button.active {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+            font-weight: bold;
+        }
+
+        .dashboard-content {
+            padding: 20px 0;
+        }
+
+        .dashboard-section {
+            display: none;
+        }
+
+        .dashboard-section.active {
+            display: block;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .progress-goals {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .goal-card {
+            width: calc(50% - 10px);
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .goal-progress {
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .goal-bar {
+            height: 100%;
+            background-color: #3498db;
+            width: 0;
+            transition: width 0.5s;
+        }
+
+        .calendar-heatmap {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .heatmap-cell {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 3px;
+            background-color: #ecf0f1;
+        }
+
+        .streak-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .streak-count {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .tags-container {
+            margin: 20px 0;
+        }
+
+        .tag-input {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .tag-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 16px;
+        }
+
+        .tag-input button {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+
+        .tags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .tag {
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .pomodoro-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .pomodoro-settings {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .pomodoro-settings input {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .pomodoro-phase {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+
+        /* Timeline styling */
+        .timeline {
+            position: relative;
+            max-width: 100%;
+            margin: 20px auto;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #3498db;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border: 4px solid #3498db;
+            border-radius: 50%;
+            top: 15px;
+            z-index: 1;
+        }
+
+        .timeline-left {
+            left: 0;
+        }
+
+        .timeline-right {
+            left: 50%;
+        }
+
+        .timeline-left::after {
+            right: -10px;
+        }
+
+        .timeline-right::after {
+            left: -10px;
+        }
+
+        .timeline-content {
+            padding: 15px;
+            background-color: white;
+            position: relative;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive styles */
+        @media screen and (max-width: 600px) {
+            .timeline::after {
+                left: 31px;
+            }
+
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+
+            .timeline-left::after,
+            .timeline-right::after {
+                left: 21px;
+            }
+
+            .timeline-right {
+                left: 0;
+            }
+
+            .goal-card {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>Study Time Tracker</h1>
+        <h1>Enhanced Study Time Tracker</h1>
 
         <div class="timer-display" id="timer">00:00:00</div>
 
         <div class="controls">
             <button class="btn btn-play-pause" id="playPauseBtn">Play</button>
+            <button class="btn btn-dashboard" id="dashboardBtn">Dashboard</button>
             <button class="btn btn-download" id="downloadBtn">Download CSV</button>
+            <button class="btn btn-reset" id="resetTimerBtn">Reset Timer</button>
+            </div>
+            
+            <div class="tags-container">
+                <h3>Add Tags to Your Session</h3>
+                <div class="tag-input">
+                    <input type="text" id="tagInput" placeholder="Add a subject or topic tag...">
+                    <button id="addTagBtn">Add</button>
+                </div>
+                <div class="tags-list" id="tagsList"></div>
+            </div>
+            
+            <div class="pomodoro-container">
+                <h3>Pomodoro Timer (Optional)</h3>
+                <div class="pomodoro-settings">
+                    <div>
+                        <label for="workTime">Work:</label>
+                        <input type="number" id="workTime" value="25" min="1"> min
+                    </div>
+                    <div>
+                        <label for="breakTime">Break:</label>
+                        <input type="number" id="breakTime" value="5" min="1"> min
+                    </div>
+                    <button class="btn" id="startPomodoro">Start Pomodoro</button>
+                </div>
+                <div class="pomodoro-phase" id="pomodoroPhase"></div>
         </div>
 
         <div class="stats">
@@ -129,14 +465,167 @@
         </div>
     </div>
 
+    <div class="container dashboard" id="dashboard">
+        <h2>Study Analytics Dashboard</h2>
+    
+        <div class="dashboard-nav">
+            <button class="active" data-section="overview">Overview</button>
+            <button data-section="history">History</button>
+            <button data-section="timeline">Timeline</button>
+            <button data-section="streaks">Streaks & Goals</button>
+        </div>
+    
+        <div class="dashboard-content">
+            <!-- Overview Section -->
+            <div class="dashboard-section active" id="section-overview">
+                <h3>Study Time Overview</h3>
+                <div class="chart-container" id="weeklyChart">
+                    <!-- Weekly chart will be rendered here -->
+                </div>
+    
+                <div class="stats-summary">
+                    <h3>Quick Stats</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <h4>This Week</h4>
+                            <p>Total time: <span id="weekTotal">0 minutes</span></p>
+                            <p>Daily average: <span id="weekAverage">0 minutes</span></p>
+                            <p>Best day: <span id="weekBestDay">None</span></p>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <h4>This Month</h4>
+                            <p>Total time: <span id="monthTotal">0 minutes</span></p>
+                            <p>Daily average: <span id="monthAverage">0 minutes</span></p>
+                            <p>Best week: <span id="monthBestWeek">None</span></p>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="tags-analysis">
+                    <h3>Study Breakdown by Subject</h3>
+                    <div class="chart-container" id="tagsChart">
+                        <!-- Tags breakdown chart will be rendered here -->
+                    </div>
+                </div>
+            </div>
+    
+            <!-- History Section -->
+            <div class="dashboard-section" id="section-history">
+                <h3>Study History</h3>
+    
+                <div class="date-selector" style="margin-bottom: 20px;">
+                    <label for="historyDate">Select Date: </label>
+                    <input type="date" id="historyDate">
+                    <button class="btn" id="viewHistoryBtn">View</button>
+                </div>
+    
+                <div id="historyContent">
+                    <p>Select a date to view your study history.</p>
+                </div>
+    
+                <div class="calendar-heatmap-container">
+                    <h3>Activity Heatmap</h3>
+                    <div class="calendar-heatmap" id="heatmap">
+                        <!-- Calendar heatmap will be rendered here -->
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Timeline Section -->
+            <div class="dashboard-section" id="section-timeline">
+                <h3>Study Timeline</h3>
+    
+                <div style="margin-bottom: 20px;">
+                    <label for="timelineRange">View: </label>
+                    <select id="timelineRange">
+                        <option value="day">Today</option>
+                        <option value="week" selected>This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+    
+                <div class="timeline" id="studyTimeline">
+                    <!-- Timeline will be rendered here -->
+                </div>
+            </div>
+    
+            <!-- Streaks & Goals Section -->
+            <div class="dashboard-section" id="section-streaks">
+                <h3>Streaks & Goals</h3>
+    
+                <div class="streak-info">
+                    <p>Current streak</p>
+                    <div class="streak-count" id="currentStreak">0</div>
+                    <p>days</p>
+                </div>
+    
+                <h3>Study Goals</h3>
+                <div class="goal-setting" style="margin: 20px 0;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="number" id="goalMinutes" placeholder="Minutes" min="1" style="width: 100px;">
+                        <select id="goalPeriod" style="width: 150px;">
+                            <option value="daily">Daily Goal</option>
+                            <option value="weekly">Weekly Goal</option>
+                        </select>
+                        <button class="btn" id="setGoalBtn">Set Goal</button>
+                    </div>
+                </div>
+    
+                <div class="progress-goals" id="goalsContainer">
+                    <!-- Goals will be rendered here -->
+                </div>
+            </div>
+        </div>
+    
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn" id="backToTrackerBtn">Back to Timer</button>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // DOM elements
             const timerDisplay = document.getElementById('timer');
             const playPauseBtn = document.getElementById('playPauseBtn');
             const downloadBtn = document.getElementById('downloadBtn');
+            const dashboardBtn = document.getElementById('dashboardBtn');
+            const resetTimerBtn = document.getElementById('resetTimerBtn');
             const todayTotalEl = document.getElementById('todayTotal');
             const todaySessionsEl = document.getElementById('todaySessions');
+            const dashboard = document.getElementById('dashboard');
+            const backToTrackerBtn = document.getElementById('backToTrackerBtn');
+            const tagInput = document.getElementById('tagInput');
+            const addTagBtn = document.getElementById('addTagBtn');
+            const tagsList = document.getElementById('tagsList');
+
+            // Pomodoro elements
+            const startPomodoroBtn = document.getElementById('startPomodoro');
+            const workTimeInput = document.getElementById('workTime');
+            const breakTimeInput = document.getElementById('breakTime');
+            const pomodoroPhaseEl = document.getElementById('pomodoroPhase');
+
+            // Dashboard elements
+            const dashboardNavBtns = document.querySelectorAll('.dashboard-nav button');
+            const dashboardSections = document.querySelectorAll('.dashboard-section');
+            const timelineRangeSelect = document.getElementById('timelineRange');
+            const studyTimeline = document.getElementById('studyTimeline');
+            const historyDateInput = document.getElementById('historyDate');
+            const viewHistoryBtn = document.getElementById('viewHistoryBtn');
+            const historyContent = document.getElementById('historyContent');
+            const setGoalBtn = document.getElementById('setGoalBtn');
+            const goalMinutesInput = document.getElementById('goalMinutes');
+            const goalPeriodSelect = document.getElementById('goalPeriod');
+            const goalsContainer = document.getElementById('goalsContainer');
+            const currentStreakEl = document.getElementById('currentStreak');
+
+            // Stats elements
+            const weekTotalEl = document.getElementById('weekTotal');
+            const weekAverageEl = document.getElementById('weekAverage');
+            const weekBestDayEl = document.getElementById('weekBestDay');
+            const monthTotalEl = document.getElementById('monthTotal');
+            const monthAverageEl = document.getElementById('monthAverage');
+            const monthBestWeekEl = document.getElementById('monthBestWeek');
 
             // Timer variables
             let timerInterval;
@@ -144,12 +633,32 @@
             let startTime;
             let elapsedTime = 0;
             let currentSession = null;
+            let currentTags = [];
+
+            // Pomodoro variables
+            let pomodoroInterval;
+            let isPomodoroRunning = false;
+            let isWorkPhase = true;
+            let pomodoroTimeLeft = 0;
 
             // Load data from localStorage
             let studyData = JSON.parse(localStorage.getItem('studyTrackerData')) || {};
+            let studyGoals = JSON.parse(localStorage.getItem('studyGoals')) || {
+                daily: 120, // Default 2 hours per day
+                weekly: 600  // Default 10 hours per week
+            };
 
             // Initialize
             updateStats();
+            setupDashboard();
+            setCurrentDate();
+
+            // Set the current date in date input
+            function setCurrentDate() {
+                const today = new Date();
+                const dateString = formatDate(today);
+                historyDateInput.value = dateString;
+            }
 
             // Format time as HH:MM:SS
             function formatTime(milliseconds) {
@@ -185,13 +694,15 @@
             function startTimer() {
                 isRunning = true;
                 playPauseBtn.textContent = 'Pause';
+                playPauseBtn.classList.add('paused');
                 startTime = Date.now();
 
                 // Create new session
                 currentSession = {
                     start: new Date().toISOString(),
                     end: null,
-                    duration: 0
+                    duration: 0,
+                    tags: [...currentTags]
                 };
 
                 timerInterval = setInterval(updateTimer, 1000);
@@ -201,6 +712,7 @@
             function pauseTimer() {
                 isRunning = false;
                 playPauseBtn.textContent = 'Play';
+                playPauseBtn.classList.remove('paused');
                 clearInterval(timerInterval);
 
                 // Calculate elapsed time
@@ -219,6 +731,7 @@
                 }
 
                 updateStats();
+                updateDashboardStats();
             }
 
             // Toggle timer
@@ -228,6 +741,15 @@
                 } else {
                     startTimer();
                 }
+            }
+
+            // Reset timer
+            function resetTimer() {
+                if (isRunning) {
+                    pauseTimer();
+                }
+                elapsedTime = 0;
+                timerDisplay.textContent = '00:00:00';
             }
 
             // Save session to localStorage
@@ -267,11 +789,13 @@
                         const startTime = new Date(session.start).toLocaleTimeString();
                         const endTime = session.end ? new Date(session.end).toLocaleTimeString() : 'In progress';
                         const duration = session.duration || 0;
+                        const tags = session.tags ? session.tags.join(', ') : '';
 
                         const sessionEl = document.createElement('div');
                         sessionEl.className = 'session-item';
                         sessionEl.innerHTML = `
                             <strong>Session ${index + 1}:</strong> ${startTime} - ${endTime} (${duration} minutes)
+                            ${tags ? `<br><small>Tags: ${tags}</small>` : ''}
                         `;
                         todaySessionsEl.appendChild(sessionEl);
                     });
@@ -280,13 +804,14 @@
 
             // Generate CSV data
             function generateCSV() {
-                let csvContent = "date,session,start,end,duration_minutes\n";
+                let csvContent = "date,session,start,end,duration_minutes,tags\n";
 
                 Object.keys(studyData).sort().forEach(date => {
                     const dayData = studyData[date];
 
                     dayData.sessions.forEach((session, index) => {
-                        csvContent += `${date},${index + 1},${session.start},${session.end || ''},${session.duration || 0}\n`;
+                        const tags = session.tags ? session.tags.join(';') : '';
+                        csvContent += `${date},${index + 1},${session.start},${session.end || ''},${session.duration || 0},"${tags}"\n`;
                     });
                 });
 
@@ -309,19 +834,630 @@
                 document.body.removeChild(link);
             }
 
+            // Add a tag
+            function addTag() {
+                const tagText = tagInput.value.trim();
+                if (tagText && !currentTags.includes(tagText)) {
+                    currentTags.push(tagText);
+                    renderTags();
+                    tagInput.value = '';
+                }
+            }
+
+            // Remove a tag
+            function removeTag(tagToRemove) {
+                currentTags = currentTags.filter(tag => tag !== tagToRemove);
+                renderTags();
+            }
+
+            // Render tags
+            function renderTags() {
+                tagsList.innerHTML = '';
+                currentTags.forEach(tag => {
+                    const tagElement = document.createElement('div');
+                    tagElement.className = 'tag';
+                    tagElement.innerHTML = `
+                        ${tag}
+                        <button data-tag="${tag}">&times;</button>
+                    `;
+                    tagsList.appendChild(tagElement);
+                });
+
+                // Add event listeners to tag remove buttons
+                document.querySelectorAll('.tag button').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        removeTag(this.dataset.tag);
+                    });
+                });
+            }
+
+            // Start Pomodoro timer
+            function startPomodoro() {
+                if (isPomodoroRunning) {
+                    stopPomodoro();
+                    return;
+                }
+
+                const workMinutes = parseInt(workTimeInput.value);
+                const breakMinutes = parseInt(breakTimeInput.value);
+
+                if (isNaN(workMinutes) || isNaN(breakMinutes) || workMinutes <= 0 || breakMinutes <= 0) {
+                    alert('Please enter valid time values for Pomodoro timer');
+                    return;
+                }
+
+                isPomodoroRunning = true;
+                isWorkPhase = true;
+                pomodoroTimeLeft = workMinutes * 60;
+                startPomodoroBtn.textContent = 'Stop Pomodoro';
+
+                updatePomodoroDisplay();
+                pomodoroInterval = setInterval(updatePomodoro, 1000);
+
+                // Start study timer if not already running
+                if (!isRunning) {
+                    toggleTimer();
+                }
+            }
+
+            // Stop Pomodoro timer
+            function stopPomodoro() {
+                isPomodoroRunning = false;
+                clearInterval(pomodoroInterval);
+                startPomodoroBtn.textContent = 'Start Pomodoro';
+                pomodoroPhaseEl.textContent = '';
+            }
+
+            // Update Pomodoro timer
+            function updatePomodoro() {
+                pomodoroTimeLeft--;
+
+                if (pomodoroTimeLeft <= 0) {
+                    // Switch phases
+                    isWorkPhase = !isWorkPhase;
+
+                    if (isWorkPhase) {
+                        pomodoroTimeLeft = parseInt(workTimeInput.value) * 60;
+                        // Resume study timer if it's work phase
+                        if (!isRunning) {
+                            toggleTimer();
+                        }
+                    } else {
+                        pomodoroTimeLeft = parseInt(breakTimeInput.value) * 60;
+                        // Pause study timer if it's break phase
+                        if (isRunning) {
+                            toggleTimer();
+                        }
+                    }
+
+                    // Play notification sound
+                    try {
+                        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-simple-countdown-922.mp3');
+                        audio.play();
+                    } catch (e) {
+                        console.log('Could not play sound notification');
+                    }
+                }
+
+                updatePomodoroDisplay();
+            }
+
+            // Update Pomodoro display
+            function updatePomodoroDisplay() {
+                const minutes = Math.floor(pomodoroTimeLeft / 60);
+                const seconds = pomodoroTimeLeft % 60;
+                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                pomodoroPhaseEl.textContent = `${isWorkPhase ? 'Work' : 'Break'} Phase: ${timeString}`;
+            }
+
+            // Setup dashboard
+            function setupDashboard() {
+                // Initialize dashboard navigation
+                dashboardNavBtns.forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        // Remove active class from all buttons and sections
+                        dashboardNavBtns.forEach(b => b.classList.remove('active'));
+                        dashboardSections.forEach(s => s.classList.remove('active'));
+
+                        // Add active class to clicked button and corresponding section
+                        this.classList.add('active');
+                        const sectionId = `section-${this.dataset.section}`;
+                        document.getElementById(sectionId).classList.add('active');
+
+                        // Update timeline if timeline section is active
+                        if (this.dataset.section === 'timeline') {
+                            updateTimeline();
+                        }
+                    });
+                });
+
+                // Initialize timeline range selector
+                timelineRangeSelect.addEventListener('change', updateTimeline);
+
+                // Initialize history date selector
+                viewHistoryBtn.addEventListener('click', function () {
+                    const selectedDate = historyDateInput.value;
+                    showHistoryForDate(selectedDate);
+                });
+
+                // Initialize goal setting
+                setGoalBtn.addEventListener('click', function () {
+                    const minutes = parseInt(goalMinutesInput.value);
+                    const period = goalPeriodSelect.value;
+
+                    if (isNaN(minutes) || minutes <= 0) {
+                        alert('Please enter a valid time goal in minutes');
+                        return;
+                    }
+
+                    studyGoals[period] = minutes;
+                    localStorage.setItem('studyGoals', JSON.stringify(studyGoals));
+                    updateGoals();
+                });
+
+                // Load and display goals
+                updateGoals();
+
+                // Update all dashboard stats
+                updateDashboardStats();
+            }
+
+            // Update dashboard statistics
+            function updateDashboardStats() {
+                calculateWeeklyStats();
+                calculateMonthlyStats();
+                updateStreak();
+                updateGoals();
+                renderHeatmap();
+            }
+
+            // Calculate weekly statistics
+            function calculateWeeklyStats() {
+                const today = new Date();
+                const dayOfWeek = today.getDay(); // 0 (Sunday) to 6 (Saturday)
+                const daysToSunday = dayOfWeek; // Days to go back to reach Sunday
+
+                let weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - daysToSunday);
+                weekStart = formatDate(weekStart);
+
+                let totalMinutes = 0;
+                let daysCounted = 0;
+                let bestDay = { date: null, minutes: 0 };
+
+                // Loop through each day of the week
+                for (let i = 0; i <= 6; i++) {
+                    const day = new Date(today);
+                    day.setDate(today.getDate() - daysToSunday + i);
+                    const dateStr = formatDate(day);
+
+                    if (dateStr > formatDate(today)) {
+                        continue; // Skip future days
+                    }
+
+                    const dayData = studyData[dateStr];
+                    let dayMinutes = 0;
+
+                    if (dayData && dayData.sessions) {
+                        dayMinutes = dayData.sessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+                        totalMinutes += dayMinutes;
+                        daysCounted++;
+
+                        if (dayMinutes > bestDay.minutes) {
+                            bestDay = { date: dateStr, minutes: dayMinutes };
+                        }
+                    }
+                }
+
+                const avgMinutes = daysCounted > 0 ? Math.round(totalMinutes / daysCounted) : 0;
+
+                // Update UI
+                weekTotalEl.textContent = `${totalMinutes} minutes`;
+                weekAverageEl.textContent = `${avgMinutes} minutes per day`;
+                weekBestDayEl.textContent = bestDay.date ? `${formatDateForDisplay(bestDay.date)} (${bestDay.minutes} min)` : 'None';
+
+                // Return data for visualization
+                return { total: totalMinutes, average: avgMinutes, bestDay };
+            }
+
+            // Calculate monthly statistics
+            function calculateMonthlyStats() {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = today.getMonth();
+
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+
+                let totalMinutes = 0;
+                let daysCounted = 0;
+                let weeklyTotals = Array(5).fill(0); // Up to 5 weeks in a month
+
+                // Loop through each day of the month
+                for (let day = new Date(firstDay); day <= lastDay && day <= today; day.setDate(day.getDate() + 1)) {
+                    const dateStr = formatDate(day);
+                    const dayData = studyData[dateStr];
+
+                    if (dayData && dayData.sessions) {
+                        const dayMinutes = dayData.sessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+                        totalMinutes += dayMinutes;
+                        daysCounted++;
+
+                        // Calculate which week of the month this is (0-indexed)
+                        const weekOfMonth = Math.floor((day.getDate() - 1) / 7);
+                        weeklyTotals[weekOfMonth] += dayMinutes;
+                    }
+                }
+
+                const avgMinutes = daysCounted > 0 ? Math.round(totalMinutes / daysCounted) : 0;
+
+                // Find best week
+                let bestWeekIndex = 0;
+                let bestWeekMinutes = 0;
+
+                weeklyTotals.forEach((total, index) => {
+                    if (total > bestWeekMinutes) {
+                        bestWeekMinutes = total;
+                        bestWeekIndex = index;
+                    }
+                });
+
+                // Update UI
+                monthTotalEl.textContent = `${totalMinutes} minutes`;
+                monthAverageEl.textContent = `${avgMinutes} minutes per day`;
+                monthBestWeekEl.textContent = bestWeekMinutes > 0 ? `Week ${bestWeekIndex + 1} (${bestWeekMinutes} min)` : 'None';
+
+                // Return data for visualization
+                return { total: totalMinutes, average: avgMinutes, weeklyTotals };
+            }
+
+            // Update study streak calculation
+            function updateStreak() {
+                const today = new Date();
+                const todayStr = formatDate(today);
+
+                let currentStreak = 0;
+                let hasTodayStudy = false;
+
+                // Check if there's study time logged today
+                const todayData = studyData[todayStr];
+                if (todayData && todayData.sessions && todayData.sessions.length > 0) {
+                    hasTodayStudy = true;
+                    currentStreak = 1;
+                }
+
+                // Count consecutive days backwards
+                for (let i = 1; i <= 365; i++) { // Check up to a year back
+                    const checkDate = new Date(today);
+                    checkDate.setDate(today.getDate() - i);
+                    const dateStr = formatDate(checkDate);
+
+                    const dayData = studyData[dateStr];
+                    if (dayData && dayData.sessions && dayData.sessions.length > 0) {
+                        if (i === 1 || currentStreak > 0) {
+                            currentStreak++;
+                        }
+                    } else {
+                        // Break on first day with no study sessions
+                        if (!hasTodayStudy && i === 1) {
+                            // If no study today, check if there was study yesterday
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                // Update UI
+                currentStreakEl.textContent = currentStreak;
+            }
+
+            // Update goals and progress
+            function updateGoals() {
+                goalsContainer.innerHTML = '';
+
+                // Daily goal
+                const today = getTodayDate();
+                const todayData = studyData[today] || { sessions: [] };
+                const todayMinutes = todayData.sessions.reduce((total, session) => {
+                    return total + (session.duration || 0);
+                }, 0);
+
+                const dailyGoal = studyGoals.daily || 120; // Default 2 hours
+                const dailyProgress = Math.min(100, Math.round((todayMinutes / dailyGoal) * 100));
+
+                const dailyGoalEl = document.createElement('div');
+                dailyGoalEl.className = 'goal-card';
+                dailyGoalEl.innerHTML = `
+                    <h4>Daily Goal</h4>
+                    <p>${todayMinutes} / ${dailyGoal} minutes (${dailyProgress}%)</p>
+                    <div class="goal-progress">
+                        <div class="goal-bar" style="width: ${dailyProgress}%;"></div>
+                    </div>
+                `;
+                goalsContainer.appendChild(dailyGoalEl);
+
+                // Weekly goal
+                const weeklyStats = calculateWeeklyStats();
+                const weeklyGoal = studyGoals.weekly || 600; // Default 10 hours
+                const weeklyProgress = Math.min(100, Math.round((weeklyStats.total / weeklyGoal) * 100));
+
+                const weeklyGoalEl = document.createElement('div');
+                weeklyGoalEl.className = 'goal-card';
+                weeklyGoalEl.innerHTML = `
+                    <h4>Weekly Goal</h4>
+                    <p>${weeklyStats.total} / ${weeklyGoal} minutes (${weeklyProgress}%)</p>
+                    <div class="goal-progress">
+                        <div class="goal-bar" style="width: ${weeklyProgress}%;"></div>
+                    </div>
+                `;
+                goalsContainer.appendChild(weeklyGoalEl);
+            }
+
+            // Render calendar heatmap
+            function renderHeatmap() {
+                const heatmapEl = document.getElementById('heatmap');
+                heatmapEl.innerHTML = '';
+
+                const today = new Date();
+                const daysToShow = 35; // 5 weeks
+
+                // Find highest study time to normalize colors
+                let maxMinutes = 0;
+
+                for (let i = daysToShow - 1; i >= 0; i--) {
+                    const day = new Date(today);
+                    day.setDate(today.getDate() - i);
+                    const dateStr = formatDate(day);
+
+                    const dayData = studyData[dateStr];
+                    let dayMinutes = 0;
+
+                    if (dayData && dayData.sessions) {
+                        dayMinutes = dayData.sessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+                        if (dayMinutes > maxMinutes) {
+                            maxMinutes = dayMinutes;
+                        }
+                    }
+                }
+
+                // Create heatmap cells
+                for (let i = daysToShow - 1; i >= 0; i--) {
+                    const day = new Date(today);
+                    day.setDate(today.getDate() - i);
+                    const dateStr = formatDate(day);
+
+                    const dayData = studyData[dateStr];
+                    let dayMinutes = 0;
+
+                    if (dayData && dayData.sessions) {
+                        dayMinutes = dayData.sessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+                    }
+
+                    const intensity = maxMinutes > 0 ? dayMinutes / maxMinutes : 0;
+                    const cellColor = getHeatmapColor(intensity);
+
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    cell.style.backgroundColor = cellColor;
+                    cell.title = `${formatDateForDisplay(dateStr)}: ${dayMinutes} minutes`;
+                    cell.dataset.date = dateStr;
+                    cell.addEventListener('click', function () {
+                        historyDateInput.value = this.dataset.date;
+                        showHistoryForDate(this.dataset.date);
+
+                        // Switch to history tab
+                        dashboardNavBtns.forEach(b => b.classList.remove('active'));
+                        dashboardSections.forEach(s => s.classList.remove('active'));
+
+                        document.querySelector('[data-section="history"]').classList.add('active');
+                        document.getElementById('section-history').classList.add('active');
+                    });
+
+                    heatmapEl.appendChild(cell);
+                }
+            }
+
+            // Get color for heatmap based on intensity
+            function getHeatmapColor(intensity) {
+                if (intensity === 0) {
+                    return '#ecf0f1';
+                }
+
+                // Blue color scale from light to dark
+                const blue = Math.round(235 - (intensity * 150));
+                return `rgb(52, ${Math.max(100, Math.round(152 - (intensity * 70)))}, ${blue})`;
+            }
+
+            // Show history for a specific date
+            function showHistoryForDate(dateStr) {
+                const dayData = studyData[dateStr];
+
+                if (!dayData || !dayData.sessions || dayData.sessions.length === 0) {
+                    historyContent.innerHTML = `<p>No study sessions recorded for ${formatDateForDisplay(dateStr)}.</p>`;
+                    return;
+                }
+
+                const totalMinutes = dayData.sessions.reduce((total, session) => {
+                    return total + (session.duration || 0);
+                }, 0);
+
+                let tagsCount = {};
+                dayData.sessions.forEach(session => {
+                    if (session.tags) {
+                        session.tags.forEach(tag => {
+                            tagsCount[tag] = (tagsCount[tag] || 0) + (session.duration || 0);
+                        });
+                    }
+                });
+
+                let sessionsHtml = '';
+                dayData.sessions.forEach((session, index) => {
+                    const startTime = new Date(session.start).toLocaleTimeString();
+                    const endTime = session.end ? new Date(session.end).toLocaleTimeString() : 'In progress';
+                    const duration = session.duration || 0;
+                    const tags = session.tags ? session.tags.join(', ') : 'None';
+
+                    sessionsHtml += `
+                        <div class="session-item">
+                            <strong>Session ${index + 1}:</strong> ${startTime} - ${endTime} (${duration} minutes)
+                            <br><small>Tags: ${tags}</small>
+                        </div>
+                    `;
+                });
+
+                let tagsHtml = '';
+                if (Object.keys(tagsCount).length > 0) {
+                    tagsHtml = '<h4>Time by Subject</h4><ul>';
+                    Object.entries(tagsCount).forEach(([tag, minutes]) => {
+                        tagsHtml += `<li>${tag}: ${minutes} minutes</li>`;
+                    });
+                    tagsHtml += '</ul>';
+                }
+
+                historyContent.innerHTML = `
+                    <h3>${formatDateForDisplay(dateStr)} Summary</h3>
+                    <p>Total study time: <strong>${totalMinutes} minutes</strong></p>
+                    <p>Number of sessions: <strong>${dayData.sessions.length}</strong></p>
+                    
+                    ${tagsHtml}
+                    
+                    <h4>Sessions Detail</h4>
+                    <div class="session-list">
+                        ${sessionsHtml}
+                    </div>
+                `;
+            }
+
+            // Update timeline display
+            function updateTimeline() {
+                const range = timelineRangeSelect.value;
+                const today = new Date();
+                let startDate;
+
+                // Determine date range
+                switch (range) {
+                    case 'day':
+                        startDate = new Date(today);
+                        break;
+                    case 'week':
+                        startDate = new Date(today);
+                        startDate.setDate(today.getDate() - 7);
+                        break;
+                    case 'month':
+                        startDate = new Date(today);
+                        startDate.setMonth(today.getMonth() - 1);
+                        break;
+                    case 'all':
+                        startDate = new Date(2000, 0, 1); // Far in the past
+                        break;
+                }
+
+                // Convert to string format
+                const startDateStr = formatDate(startDate);
+                const endDateStr = formatDate(today);
+
+                // Filter study data by date range
+                const filteredDates = Object.keys(studyData)
+                    .filter(date => date >= startDateStr && date <= endDateStr)
+                    .sort();
+
+                if (filteredDates.length === 0) {
+                    studyTimeline.innerHTML = '<p>No study sessions in the selected time range.</p>';
+                    return;
+                }
+
+                // Build timeline HTML
+                let timelineHtml = '';
+                let isLeft = true;
+
+                filteredDates.forEach(date => {
+                    const dayData = studyData[date];
+                    if (!dayData || !dayData.sessions || dayData.sessions.length === 0) {
+                        return;
+                    }
+
+                    const totalMinutes = dayData.sessions.reduce((total, session) => {
+                        return total + (session.duration || 0);
+                    }, 0);
+
+                    // Get list of tags used on this day
+                    let dayTags = new Set();
+                    dayData.sessions.forEach(session => {
+                        if (session.tags) {
+                            session.tags.forEach(tag => dayTags.add(tag));
+                        }
+                    });
+
+                    const timelineItemClass = isLeft ? 'timeline-left' : 'timeline-right';
+
+                    timelineHtml += `
+                        <div class="timeline-item ${timelineItemClass}">
+                            <div class="timeline-content">
+                                <h4>${formatDateForDisplay(date)}</h4>
+                                <p>Studied for <strong>${totalMinutes} minutes</strong> across ${dayData.sessions.length} session${dayData.sessions.length !== 1 ? 's' : ''}</p>
+                                ${dayTags.size > 0 ? `<p>Subjects: ${Array.from(dayTags).join(', ')}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    isLeft = !isLeft;
+                });
+
+                studyTimeline.innerHTML = timelineHtml;
+            }
+
+            // Format date for display
+            function formatDateForDisplay(dateStr) {
+                if (!dateStr) return '';
+
+                const [year, month, day] = dateStr.split('-');
+                const date = new Date(year, month - 1, day);
+
+                const options = { weekday: 'short', month: 'short', day: 'numeric' };
+                return date.toLocaleDateString('en-US', options);
+            }
+
             // Event listeners
             playPauseBtn.addEventListener('click', toggleTimer);
             downloadBtn.addEventListener('click', downloadCSV);
+            resetTimerBtn.addEventListener('click', resetTimer);
+
+            dashboardBtn.addEventListener('click', function () {
+                document.querySelector('.container').style.display = 'none';
+                dashboard.style.display = 'block';
+                dashboard.classList.add('active');
+                updateDashboardStats();
+            });
+
+            backToTrackerBtn.addEventListener('click', function () {
+                document.querySelector('.container').style.display = 'block';
+                dashboard.style.display = 'none';
+                dashboard.classList.remove('active');
+            });
+
+            addTagBtn.addEventListener('click', addTag);
+            tagInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    addTag();
+                }
+            });
+
+            startPomodoroBtn.addEventListener('click', startPomodoro);
 
             // Keyboard shortcut for play/pause (spacebar)
             document.addEventListener('keydown', function (event) {
-                if (event.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+                if (event.code === 'Space' &&
+                    document.activeElement.tagName !== 'INPUT' &&
+                    document.activeElement.tagName !== 'BUTTON' &&
+                    document.activeElement.tagName !== 'TEXTAREA') {
                     event.preventDefault(); // Prevent scrolling with spacebar
                     toggleTimer();
                 }
             });
         });
-    </script>
+</script>
 </body>
 
 </html>
