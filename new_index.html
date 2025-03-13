@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Time Tracker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-play-pause {
+            min-width: 120px;
+            font-weight: bold;
+        }
+
+        .btn-download {
+            background-color: #27ae60;
+        }
+
+        .btn-download:hover {
+            background-color: #219653;
+        }
+
+        .stats {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .daily-summary {
+            margin-top: 20px;
+        }
+
+        .session-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .session-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .session-item:last-child {
+            border-bottom: none;
+        }
+
+        .today {
+            font-weight: bold;
+            color: #3498db;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Study Time Tracker</h1>
+
+        <div class="timer-display" id="timer">00:00:00</div>
+
+        <div class="controls">
+            <button class="btn btn-play-pause" id="playPauseBtn">Play</button>
+            <button class="btn btn-download" id="downloadBtn">Download CSV</button>
+        </div>
+
+        <div class="stats">
+            <h2>Today's Stats</h2>
+            <p>Total study time today: <span id="todayTotal">0 minutes</span></p>
+
+            <div class="daily-summary">
+                <h3>Today's Sessions</h3>
+                <div class="session-list" id="todaySessions">
+                    <!-- Sessions will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // DOM elements
+            const timerDisplay = document.getElementById('timer');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const todayTotalEl = document.getElementById('todayTotal');
+            const todaySessionsEl = document.getElementById('todaySessions');
+
+            // Timer variables
+            let timerInterval;
+            let isRunning = false;
+            let startTime;
+            let elapsedTime = 0;
+            let currentSession = null;
+
+            // Load data from localStorage
+            let studyData = JSON.parse(localStorage.getItem('studyTrackerData')) || {};
+
+            // Initialize
+            updateStats();
+
+            // Format time as HH:MM:SS
+            function formatTime(milliseconds) {
+                let seconds = Math.floor(milliseconds / 1000);
+                let minutes = Math.floor(seconds / 60);
+                let hours = Math.floor(minutes / 60);
+
+                seconds = seconds % 60;
+                minutes = minutes % 60;
+
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            // Format date as YYYY-MM-DD
+            function formatDate(date) {
+                const d = date || new Date();
+                return d.toISOString().split('T')[0];
+            }
+
+            // Get today's date
+            function getTodayDate() {
+                return formatDate(new Date());
+            }
+
+            // Update timer display
+            function updateTimer() {
+                const now = Date.now();
+                const totalTime = elapsedTime + (now - startTime);
+                timerDisplay.textContent = formatTime(totalTime);
+            }
+
+            // Start timer
+            function startTimer() {
+                isRunning = true;
+                playPauseBtn.textContent = 'Pause';
+                startTime = Date.now();
+
+                // Create new session
+                currentSession = {
+                    start: new Date().toISOString(),
+                    end: null,
+                    duration: 0
+                };
+
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+
+            // Pause timer
+            function pauseTimer() {
+                isRunning = false;
+                playPauseBtn.textContent = 'Play';
+                clearInterval(timerInterval);
+
+                // Calculate elapsed time
+                const now = Date.now();
+                elapsedTime += (now - startTime);
+
+                // Update current session
+                if (currentSession) {
+                    currentSession.end = new Date().toISOString();
+                    currentSession.duration = Math.floor(elapsedTime / 1000 / 60); // in minutes
+
+                    // Save to storage
+                    saveSession(currentSession);
+                    currentSession = null;
+                    elapsedTime = 0;
+                }
+
+                updateStats();
+            }
+
+            // Toggle timer
+            function toggleTimer() {
+                if (isRunning) {
+                    pauseTimer();
+                } else {
+                    startTimer();
+                }
+            }
+
+            // Save session to localStorage
+            function saveSession(session) {
+                const today = getTodayDate();
+
+                if (!studyData[today]) {
+                    studyData[today] = {
+                        date: today,
+                        sessions: []
+                    };
+                }
+
+                studyData[today].sessions.push(session);
+                localStorage.setItem('studyTrackerData', JSON.stringify(studyData));
+            }
+
+            // Update stats display
+            function updateStats() {
+                const today = getTodayDate();
+                const todayData = studyData[today] || { sessions: [] };
+
+                // Calculate total minutes
+                const totalMinutes = todayData.sessions.reduce((total, session) => {
+                    return total + (session.duration || 0);
+                }, 0);
+
+                todayTotalEl.textContent = `${totalMinutes} minutes`;
+
+                // Update sessions list
+                todaySessionsEl.innerHTML = '';
+
+                if (todayData.sessions.length === 0) {
+                    todaySessionsEl.innerHTML = '<div class="session-item">No sessions yet today</div>';
+                } else {
+                    todayData.sessions.forEach((session, index) => {
+                        const startTime = new Date(session.start).toLocaleTimeString();
+                        const endTime = session.end ? new Date(session.end).toLocaleTimeString() : 'In progress';
+                        const duration = session.duration || 0;
+
+                        const sessionEl = document.createElement('div');
+                        sessionEl.className = 'session-item';
+                        sessionEl.innerHTML = `
+                            <strong>Session ${index + 1}:</strong> ${startTime} - ${endTime} (${duration} minutes)
+                        `;
+                        todaySessionsEl.appendChild(sessionEl);
+                    });
+                }
+            }
+
+            // Generate CSV data
+            function generateCSV() {
+                let csvContent = "date,session,start,end,duration_minutes\n";
+
+                Object.keys(studyData).sort().forEach(date => {
+                    const dayData = studyData[date];
+
+                    dayData.sessions.forEach((session, index) => {
+                        csvContent += `${date},${index + 1},${session.start},${session.end || ''},${session.duration || 0}\n`;
+                    });
+                });
+
+                return csvContent;
+            }
+
+            // Download CSV file
+            function downloadCSV() {
+                const csv = generateCSV();
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `study_tracker_${getTodayDate()}.csv`);
+                link.style.display = 'none';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // Event listeners
+            playPauseBtn.addEventListener('click', toggleTimer);
+            downloadBtn.addEventListener('click', downloadCSV);
+
+            // Keyboard shortcut for play/pause (spacebar)
+            document.addEventListener('keydown', function (event) {
+                if (event.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+                    event.preventDefault(); // Prevent scrolling with spacebar
+                    toggleTimer();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
