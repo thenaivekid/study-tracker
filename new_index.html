@@ -386,6 +386,83 @@
                 width: 100%;
             }
         }
+
+        .alarm-settings {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3498db;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .notification.visible {
+            display: block;
+        }
     </style>
 </head>
 
@@ -413,9 +490,11 @@
 
         </div>
 
+
+
         <div class="stats">
             <h2>Today's Stats</h2>
-            <p>Total study time today: <span id="todayTotal">0 minutes</span></p>
+            <p>Total study time today:<strong> <span id="todayTotal">0 minutes</span></strong></p>
 
             <div class="daily-summary">
                 <h3>Today's Sessions</h3>
@@ -543,6 +622,15 @@
             <button class="btn" id="backToTrackerBtn">Back to Timer</button>
         </div>
     </div>
+
+    <div id="breakNotification" class="notification">
+        Time for a break! You've been studying for 25 minutes.
+    </div>
+    
+    <audio id="alarmSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -1326,6 +1414,38 @@
                     toggleTimer();
                 }
             });
+
+            const breakNotification = document.getElementById('breakNotification');
+            const alarmSound = document.getElementById('alarmSound');
+            let studyStartTime = null;
+
+            function showNotification() {
+                breakNotification.classList.add('visible');
+                alarmSound.play();
+                setTimeout(() => {
+                    breakNotification.classList.remove('visible');
+                }, 5000);
+            }
+
+            function checkBreakTime() {
+                if (studyStartTime) {
+                    const elapsedTime = (Date.now() - studyStartTime) / 1000 / 60; // in minutes
+                    if (elapsedTime >= 25) {
+                        showNotification();
+                        studyStartTime = null; // reset the timer
+                    }
+                }
+            }
+
+            function startStudySession() {
+                studyStartTime = Date.now();
+            }
+
+            // Call this function when the study session starts
+            startStudySession();
+
+            // Check break time every minute
+            setInterval(checkBreakTime, 60000);
         });
 </script>
 </body>
