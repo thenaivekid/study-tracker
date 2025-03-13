@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Study Time Tracker</title>
+    <title>Ashok's Study Time Tracker</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -300,31 +300,6 @@
             cursor: pointer;
             font-size: 14px;
         }
-
-        .pomodoro-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .pomodoro-settings {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .pomodoro-settings input {
-            width: 60px;
-            padding: 5px;
-            text-align: center;
-        }
-
-        .pomodoro-phase {
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-top: 10px;
-        }
-
         /* Timeline styling */
         .timeline {
             position: relative;
@@ -416,7 +391,7 @@
 
 <body>
     <div class="container">
-        <h1>Enhanced Study Time Tracker</h1>
+        <h1>Ashok's Study Time Tracker</h1>
 
         <div class="timer-display" id="timer">00:00:00</div>
 
@@ -435,21 +410,7 @@
                 </div>
                 <div class="tags-list" id="tagsList"></div>
             </div>
-            
-            <div class="pomodoro-container">
-                <h3>Pomodoro Timer (Optional)</h3>
-                <div class="pomodoro-settings">
-                    <div>
-                        <label for="workTime">Work:</label>
-                        <input type="number" id="workTime" value="25" min="1"> min
-                    </div>
-                    <div>
-                        <label for="breakTime">Break:</label>
-                        <input type="number" id="breakTime" value="5" min="1"> min
-                    </div>
-                    <button class="btn" id="startPomodoro">Start Pomodoro</button>
-                </div>
-                <div class="pomodoro-phase" id="pomodoroPhase"></div>
+
         </div>
 
         <div class="stats">
@@ -599,11 +560,6 @@
             const addTagBtn = document.getElementById('addTagBtn');
             const tagsList = document.getElementById('tagsList');
 
-            // Pomodoro elements
-            const startPomodoroBtn = document.getElementById('startPomodoro');
-            const workTimeInput = document.getElementById('workTime');
-            const breakTimeInput = document.getElementById('breakTime');
-            const pomodoroPhaseEl = document.getElementById('pomodoroPhase');
 
             // Dashboard elements
             const dashboardNavBtns = document.querySelectorAll('.dashboard-nav button');
@@ -634,12 +590,6 @@
             let elapsedTime = 0;
             let currentSession = null;
             let currentTags = [];
-
-            // Pomodoro variables
-            let pomodoroInterval;
-            let isPomodoroRunning = false;
-            let isWorkPhase = true;
-            let pomodoroTimeLeft = 0;
 
             // Load data from localStorage
             let studyData = JSON.parse(localStorage.getItem('studyTrackerData')) || {};
@@ -871,85 +821,6 @@
                 });
             }
 
-            // Start Pomodoro timer
-            function startPomodoro() {
-                if (isPomodoroRunning) {
-                    stopPomodoro();
-                    return;
-                }
-
-                const workMinutes = parseInt(workTimeInput.value);
-                const breakMinutes = parseInt(breakTimeInput.value);
-
-                if (isNaN(workMinutes) || isNaN(breakMinutes) || workMinutes <= 0 || breakMinutes <= 0) {
-                    alert('Please enter valid time values for Pomodoro timer');
-                    return;
-                }
-
-                isPomodoroRunning = true;
-                isWorkPhase = true;
-                pomodoroTimeLeft = workMinutes * 60;
-                startPomodoroBtn.textContent = 'Stop Pomodoro';
-
-                updatePomodoroDisplay();
-                pomodoroInterval = setInterval(updatePomodoro, 1000);
-
-                // Start study timer if not already running
-                if (!isRunning) {
-                    toggleTimer();
-                }
-            }
-
-            // Stop Pomodoro timer
-            function stopPomodoro() {
-                isPomodoroRunning = false;
-                clearInterval(pomodoroInterval);
-                startPomodoroBtn.textContent = 'Start Pomodoro';
-                pomodoroPhaseEl.textContent = '';
-            }
-
-            // Update Pomodoro timer
-            function updatePomodoro() {
-                pomodoroTimeLeft--;
-
-                if (pomodoroTimeLeft <= 0) {
-                    // Switch phases
-                    isWorkPhase = !isWorkPhase;
-
-                    if (isWorkPhase) {
-                        pomodoroTimeLeft = parseInt(workTimeInput.value) * 60;
-                        // Resume study timer if it's work phase
-                        if (!isRunning) {
-                            toggleTimer();
-                        }
-                    } else {
-                        pomodoroTimeLeft = parseInt(breakTimeInput.value) * 60;
-                        // Pause study timer if it's break phase
-                        if (isRunning) {
-                            toggleTimer();
-                        }
-                    }
-
-                    // Play notification sound
-                    try {
-                        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-simple-countdown-922.mp3');
-                        audio.play();
-                    } catch (e) {
-                        console.log('Could not play sound notification');
-                    }
-                }
-
-                updatePomodoroDisplay();
-            }
-
-            // Update Pomodoro display
-            function updatePomodoroDisplay() {
-                const minutes = Math.floor(pomodoroTimeLeft / 60);
-                const seconds = pomodoroTimeLeft % 60;
-                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-                pomodoroPhaseEl.textContent = `${isWorkPhase ? 'Work' : 'Break'} Phase: ${timeString}`;
-            }
 
             // Setup dashboard
             function setupDashboard() {
@@ -1444,7 +1315,6 @@
                 }
             });
 
-            startPomodoroBtn.addEventListener('click', startPomodoro);
 
             // Keyboard shortcut for play/pause (spacebar)
             document.addEventListener('keydown', function (event) {
