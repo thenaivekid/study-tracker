@@ -770,6 +770,7 @@
 
                 updateStats();
                 updateDashboardStats();
+                startTime = null;
             }
 
             // Toggle timer
@@ -1415,9 +1416,39 @@
                 }
             });
 
+
             const breakNotification = document.getElementById('breakNotification');
             const alarmSound = document.getElementById('alarmSound');
-            let studyStartTime = null;
+
+            function updateTitle() {
+                if (startTime === undefined || startTime === null) {
+                    document.title = "Start session";
+                    return;
+                }
+                studyStartTime = startTime;
+                const elapsedTime = (Date.now() - studyStartTime) / 1000; // in seconds
+                const hours = Math.floor(elapsedTime / 3600);
+                const minutes = Math.floor((elapsedTime % 3600) / 60);
+                const seconds = Math.floor(elapsedTime % 60);
+
+                let timeString;
+                if (hours > 0) {
+                    // Pad minutes and seconds with leading zeros when showing hours
+                    const paddedMinutes = String(minutes).padStart(2, '0');
+                    const paddedSeconds = String(seconds).padStart(2, '0');
+                    timeString = `${hours}:${paddedMinutes}:${paddedSeconds}`;
+                } else {
+                    // Show only minutes and seconds when less than an hour
+                    timeString = `${minutes}m ${seconds}s`;
+                }
+
+                document.title = timeString;
+            }
+
+            window.onload = function () {
+                updateTitle(); // Update immediately
+                setInterval(updateTitle, 1000); // Update every second for smoother display
+            };
 
             function showNotification() {
                 breakNotification.classList.add('visible');
@@ -1428,6 +1459,7 @@
             }
 
             function checkBreakTime() {
+                studyStartTime = startTime;
                 if (studyStartTime) {
                     const elapsedTime = (Date.now() - studyStartTime) / 1000 / 60; // in minutes
                     if (elapsedTime >= 25) {
